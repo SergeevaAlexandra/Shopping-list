@@ -149,6 +149,18 @@ class ListItemUpdateView(generics.UpdateAPIView):
     lookup_field = 'pk'
     permission_classes = [permissions.IsAuthenticated]
 
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if getattr(instance, '_prefetched_objects_cache', None):
+            instance._prefetched_objects_cache = {}
+
+        return Response('', status=status.HTTP_200_OK)
+
 
 
 class BulkListItemCreateView(APIView):
